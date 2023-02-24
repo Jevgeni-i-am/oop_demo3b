@@ -1,8 +1,6 @@
 package DEMOT.D3A;
 
-import DEMOT.D3A.Verkkokauppa;
-import DEMOT.D3A.VirtuaalinenTuote;
-
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class VerkkokauppaUI {
@@ -35,8 +33,6 @@ public class VerkkokauppaUI {
             }
         }
     }
-
-
 
     private void asiakasMenu() {
         int valinta = -1;
@@ -165,9 +161,112 @@ public class VerkkokauppaUI {
     /**
      * TODO: Toteuta tämä demojen 2. tehtävänä - katso demosta tarkemmat ohjeet
      */
-    private void ostotapahtumaMenu() {
 
-    }
+    private void ostotapahtumaMenu() {
+        int valinta = -1;
+        String myyjaTunniste;
+        String tuoteValinta;
+        String asiakasValinta;
+        int tuoteMaara=-1;
+        /**
+         * Ostotapahtumamenu pitää näyttää käyttäjälle lista ostotapahtumista ja valikko,
+         * josta käyttäjä voi joko lisätä uuden tapahtuman,
+         * poistaa jonkin nykyisistä tai palata päävalikkoon.
+         */
+        while (valinta != 0) {
+
+            System.out.println();
+            System.out.println("1. Lisää ostostapahtuma");
+            System.out.println("2. Poista ostostapahtuma");
+            System.out.println("3. Kaikki ostostapahtumat");
+            System.out.println("0. Päävalikkoon");
+            valinta = lueKokonaisluku(0, 3, "Anna valinta");
+            System.out.println();
+
+            /**
+             * Ostotapahtuma lisätään niin, että aluksi näytetään lista myyjistä ja
+             * pyydetään käyttäjää valitsemaan näistä yksi.
+             * Sen jälkeen sama tehdään tuotteille ja lopuksi asiakkaille.
+             */
+
+            if (valinta == 1) {
+
+                System.out.println(verkkokauppa.listaaMyyjat());
+                myyjaTunniste = lueMerkkijono( "Valitse myyjän tunniste");
+                Myyja myyja = verkkokauppa.annaMyyja(myyjaTunniste);
+
+                System.out.println(verkkokauppa.listaaTuotteet());
+                tuoteValinta = lueMerkkijono( "Valitse tuote");
+                Tuote tuote = verkkokauppa.annaTuote(tuoteValinta);
+
+                System.out.println(verkkokauppa.listaaAsiakkaat());
+                asiakasValinta = lueMerkkijono( "Valitse asiakkan tunniste");
+                Asiakas asiakas = verkkokauppa.annaAsiakas(asiakasValinta);
+
+                /**
+                 * Tämän jälkeen ohjelma vielä pyytää käyttäjää syöttämään
+                 * myytävien tuotteiden kappalemäärän.
+                 * Tuotetta ei tietenkään voi ostaa enempää kuin mitä sitä varastossa on.
+                 */
+                tuoteMaara=lueKokonaisluku(1, verkkokauppa.annaTuote(tuoteValinta).getSaldo(), "Kuinka monta kappaleita? ");
+
+                /**
+                 * Ohjelman tulee laskea ostotapahtumalle oikea hinta huomioiden käyttäjän
+                 * mahdollisen alennusprosentin (muista mahdolliset kanta-asiakkaat)!
+                 * Tämän jälkeen ostotapahtuma tallennetaan tapahtumalistan loppuun.
+                 */
+                Ostotapahtuma uusiTapahtuma =new Ostotapahtuma(asiakas, myyja, tuote, tuoteMaara  );
+                verkkokauppa.lisaaTapahtuma(uusiTapahtuma);
+                System.out.println("Ostostapahtuma lisätty!");
+                System.out.println( verkkokauppa.listaaTapahtumat());
+
+                /**
+                 * Tuotesaldoa tulee pienentää myydyn määrän verran
+                 */
+                tuote.setSaldo(tuote.getSaldo()-tuoteMaara);
+
+                /**
+                 * Ostotapahtumassa mukana oleva myyjä saa provisiota 10 % yhteishinnasta.
+                 */
+                myyja.setProvisiot(myyja.getProvisiot()+((tuote.getHinta()*tuoteMaara)*0.1));
+
+                /**
+                 * Huomaa myös, että asiakkaan ostot kasvavat yhteissummalla.
+                 */
+
+                asiakas.setOstojaTehty(asiakas.getOstojaTehty()+ uusiTapahtuma.getHinta());
+
+
+                if (valinta == 2) {
+                    /**
+                     * Ostotapahtumaa poistettaessa annetaan poistettavan tapahtuman järjestysluku.
+                     * Tätä varten järjestysluvut listataan käyttäjälle käyttöliittymässä.
+                     * Huomaa, että käyttäjälle näytettävät luvut alkavat indeksistä 1.
+                     */
+
+
+                    System.out.println( verkkokauppa.listaaTapahtumat());
+                    int poistettavaTapahtuma = lueKokonaisluku(
+                            1,
+                            verkkokauppa.listaaTapahtumat().length()+1,
+                            "Poistettavan tapahtuman numero");
+
+                    Ostotapahtuma t = verkkokauppa.annaTapahtuma(poistettavaTapahtuma-1);
+                    if(t!=null){verkkokauppa.poistaOstotapahtuma(t);}
+
+
+
+                } else {
+                    System.out.println("Ostostapahtuma ei ole luotu.");
+                }
+
+
+            }}}
+
+
+
+
+
 
     private void tulostaMenu() {
         System.out.println("1. Asiakkaat");
